@@ -1,4 +1,5 @@
 from collections import deque
+from random import choice
 
 from numpy import full, rot90
 
@@ -25,12 +26,22 @@ class Cube:
         for side_name, color  in zip(ALL_SIDE_NAMES, COLORS):
             self.sides[side_name] = full((3, 3), color)
 
-    def rotate_sides(self, string):
+    def scramble(self, num_of_moves=30):
+        '''Calls rotate_sides with random moves'''
+
+        side_names = []
+        rotations = []
+        for _ in range(num_of_moves):
+            side_names.append(choice(ALL_SIDE_NAMES))
+            rotations.append(choice([-1, 1, 2]))
+        print(side_names)
+        print(rotations)
+        self.rotate_sides(side_names, rotations)
+
+    def rotate_sides(self, side_names, rotations):
         '''For each side first rotates the selected side,
            then finds the effect of rotation on other sides
            and shifts parts of them'''
-
-        side_names, rotations = self._get_rotations(string)
 
         for side_name, rotation in zip(side_names, rotations):
             self.sides[side_name] = rot90(self.sides[side_name], k=-rotation)
@@ -68,26 +79,6 @@ class Cube:
 
             self._shift(sides_and_slices, rotation)
 
-    def _get_rotations(self, string):
-        '''Translates string of notation
-           (for example "R R2 U' B")
-           into cube rotations'''
-
-        moves = string.upper().split()
-        side_names = []
-        rotations = []
-        for move in moves:
-            if move[0] in ALL_SIDE_NAMES:
-                side_names.append(move[0])
-                if len(move) > 1:
-                    if move[1] == "'":
-                        rotations.append(-1)
-                    elif move[1] == "2":
-                        rotations.append(2)
-                else:
-                    rotations.append(1)
-        return side_names, rotations
-
     def _shift(self, sides_and_slices, rotation):
         '''Shifts given slices of sides by
            a given ammount'''
@@ -114,13 +105,35 @@ class Cube:
             print(f"\t\t{self.sides['D'][i]}")
         print('-' * 60)
 
+    def get_rotations(self, string):
+        '''Translates string of notation
+           (for example "R R2 U' B")
+           into cube rotations'''
+
+        moves = string.upper().split()
+        side_names = []
+        rotations = []
+        for move in moves:
+            if move[0] in ALL_SIDE_NAMES:
+                side_names.append(move[0])
+                if len(move) > 1:
+                    if move[1] == "'":
+                        rotations.append(-1)
+                    elif move[1] == "2":
+                        rotations.append(2)
+                else:
+                    rotations.append(1)
+        return side_names, rotations
 
 if __name__ == '__main__':
     c = Cube()
 
     c.print_cube()
 
-    test_rot = "R2 U R U R' U' R' U' R' U R'"
-    c.rotate_sides(test_rot)
+    # test_rot = "R2 U R U R' U' R' U' R' U R'"
+    # s_n, r = c.get_rotations(test_rot)
+    # c.rotate_sides(s_n, r)
+
+    c.scramble(10)
 
     c.print_cube()
