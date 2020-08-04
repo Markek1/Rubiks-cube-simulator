@@ -9,10 +9,14 @@ COLORS = {
     'g': (0, 255, 0),
     'o': (255, 128, 0),
     'b': (0, 0, 255),
-    'w': (255, 255, 255),
-    }
+    'w': (255, 255, 255),}
 ALL_SIDE_NAMES = 'ULFRBD'
-
+NOTATION = {
+    "2":2,
+    "'":-1,
+    2:"2",
+    1:"",
+    -1:"'"}
 
 class Cube:
 
@@ -37,6 +41,7 @@ class Cube:
         print(side_names)
         print(rotations)
         self.rotate_sides(side_names, rotations)
+
 
     def rotate_sides(self, side_names, rotations):
         '''For each side first rotates the selected side,
@@ -92,6 +97,7 @@ class Cube:
         for i, (sid, sli) in enumerate(sides_and_slices):
             self.sides[sid][sli] = cur_slices[i]
 
+
     def print_cube(self):
         for i in range(3):
             print(f"\t\t{self.sides['U'][i]}")
@@ -105,7 +111,9 @@ class Cube:
             print(f"\t\t{self.sides['D'][i]}")
         print('-' * 60)
 
-    def get_rotations(self, string):
+
+    @staticmethod
+    def from_notation(string):
         '''Translates string of notation
            (for example "R R2 U' B")
            into cube rotations'''
@@ -114,26 +122,33 @@ class Cube:
         side_names = []
         rotations = []
         for move in moves:
-            if move[0] in ALL_SIDE_NAMES:
-                side_names.append(move[0])
-                if len(move) > 1:
-                    if move[1] == "'":
-                        rotations.append(-1)
-                    elif move[1] == "2":
-                        rotations.append(2)
-                else:
-                    rotations.append(1)
+            side_names.append(move[0])
+            if len(move) > 1:
+                rotations.append(NOTATION[move[1]])
+            else:
+                rotations.append(1)
         return side_names, rotations
+
+    @staticmethod
+    def to_notation(side_names, rotations):
+        '''Translates cube rotations into notation'''
+
+        return_notation = []
+        for side_name, rotation in zip(side_names, rotations):
+            return_notation.append(f"{side_name}{NOTATION[rotation]}")
+        return ' '.join(return_notation)
+
 
 if __name__ == '__main__':
     c = Cube()
 
     c.print_cube()
 
-    # test_rot = "R2 U R U R' U' R' U' R' U R'"
-    # s_n, r = c.get_rotations(test_rot)
-    # c.rotate_sides(s_n, r)
+    test_rot = "R2 U R U R' U' R' U' R' U R'"
+    s_n, r = c.from_notation(test_rot)
+    c.rotate_sides(s_n, r)
 
-    c.scramble(10)
+    # c.scramble(10)
 
     c.print_cube()
+    print(c.to_notation(s_n, r))
