@@ -1,2 +1,5 @@
 # Rubiks-cube-simulator
-So far the cube's sides can be rotated, and a string of moves using the standard notation can be converted into data for rotate_sides()
+Features:
+* Rotation
+* Translation of standard notation into roatations (and the reverse)
+* Graphical visualization of the cube
