@@ -31,7 +31,7 @@ class Cube:
             self.sides[side_name] = full((3, 3), color)
 
     def scramble(self, num_of_moves=30):
-        '''Calls rotate_sides with random moves'''
+        '''Calls rotate_side with random moves'''
 
         side_names = []
         rotations = []
@@ -40,7 +40,8 @@ class Cube:
             rotations.append(choice([-1, 1, 2]))
         print(side_names)
         print(rotations)
-        self.rotate_sides(side_names, rotations)
+        for side_name, rotation in zip(side_names, rotations):
+            self.rotate_side(side_name, rotation)
 
 
     def rotate_side(self, side_name, rotation):
@@ -141,14 +142,13 @@ class Cube:
 if __name__ == '__main__':
     c = Cube()
 
-    print(c.sides.values())
     c.print_cube()
 
-    test_rot = "R2 U R U R' U' R' U' R' U R'"
-    for s_n, r in zip(*c.from_notation(test_rot)):
-        c.rotate_side(s_n, r)
+    # test_rot = "R2 U R U R' U' R' U' R' U R'"
+    # for s_n, r in zip(*c.from_notation(test_rot)):
+    #     c.rotate_side(s_n, r)
 
-    # # c.scramble(10)
+    c.scramble(10)
 
     c.print_cube()
     # print(c.to_notation(s_n, r))
