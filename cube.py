@@ -43,46 +43,45 @@ class Cube:
         self.rotate_sides(side_names, rotations)
 
 
-    def rotate_sides(self, side_names, rotations):
-        '''For each side first rotates the selected side,
+    def rotate_side(self, side_name, rotation):
+        '''First rotates the selected side,
            then finds the effect of rotation on other sides
            and shifts parts of them'''
 
-        for side_name, rotation in zip(side_names, rotations):
-            self.sides[side_name] = rot90(self.sides[side_name], k=-rotation)
+        self.sides[side_name] = rot90(self.sides[side_name], k=-rotation)
 
-            if side_name == 'U':
-                sides_and_slices = [['B', 0],
-                                    ['R', 0],
-                                    ['F', 0],
-                                    ['L', 0]]
-            elif side_name == 'L':
-                sides_and_slices = [['U', (slice(None, None, None), 0)],
-                                    ['F', (slice(None, None, None), 0)],
-                                    ['D', (slice(None, None, None), 0)],
-                                    ['B', (slice(2, None, -1), 2)]]
-            elif side_name == 'F':
-                sides_and_slices = [['U', 2],
-                                    ['R', (slice(None, None, None), 0)],
-                                    ['D', (0, slice(2, None, -1))],
-                                    ['L', (slice(2, None, -1), 2)]]
-            elif side_name == 'R':
-                sides_and_slices = [['B', (slice(None, None, None), 0)],
-                                    ['D', (slice(2, None, -1), 2)],
-                                    ['F', (slice(2, None, -1), 2)],
-                                    ['U', (slice(2, None, -1), 2)]]
-            elif side_name == 'B':
-                sides_and_slices = [['R', (slice(2, None, -1), 2) ],
-                                    ['U', (0, slice(2, None, -1))],
-                                    ['L', (slice(None, None, None), 0)],
-                                    ['D', 2],]
-            elif side_name == 'D':
-                sides_and_slices = [['L', 2],
-                                    ['F', 2],
-                                    ['R', 2],
-                                    ['B', 2]]
+        if side_name == 'U':
+            sides_and_slices = [['B', 0],
+                                ['R', 0],
+                                ['F', 0],
+                                ['L', 0]]
+        elif side_name == 'L':
+            sides_and_slices = [['U', (slice(None, None, None), 0)],
+                                ['F', (slice(None, None, None), 0)],
+                                ['D', (slice(None, None, None), 0)],
+                                ['B', (slice(2, None, -1), 2)]]
+        elif side_name == 'F':
+            sides_and_slices = [['U', 2],
+                                ['R', (slice(None, None, None), 0)],
+                                ['D', (0, slice(2, None, -1))],
+                                ['L', (slice(2, None, -1), 2)]]
+        elif side_name == 'R':
+            sides_and_slices = [['B', (slice(None, None, None), 0)],
+                                ['D', (slice(2, None, -1), 2)],
+                                ['F', (slice(2, None, -1), 2)],
+                                ['U', (slice(2, None, -1), 2)]]
+        elif side_name == 'B':
+            sides_and_slices = [['R', (slice(2, None, -1), 2) ],
+                                ['U', (0, slice(2, None, -1))],
+                                ['L', (slice(None, None, None), 0)],
+                                ['D', 2],]
+        elif side_name == 'D':
+            sides_and_slices = [['L', 2],
+                                ['F', 2],
+                                ['R', 2],
+                                ['B', 2]]
 
-            self._shift(sides_and_slices, rotation)
+        self._shift(sides_and_slices, rotation)
 
     def _shift(self, sides_and_slices, rotation):
         '''Shifts given slices of sides by
@@ -142,13 +141,14 @@ class Cube:
 if __name__ == '__main__':
     c = Cube()
 
+    print(c.sides.values())
     c.print_cube()
 
     test_rot = "R2 U R U R' U' R' U' R' U R'"
-    s_n, r = c.from_notation(test_rot)
-    c.rotate_sides(s_n, r)
+    for s_n, r in zip(*c.from_notation(test_rot)):
+        c.rotate_side(s_n, r)
 
-    # c.scramble(10)
+    # # c.scramble(10)
 
     c.print_cube()
-    print(c.to_notation(s_n, r))
+    # print(c.to_notation(s_n, r))
