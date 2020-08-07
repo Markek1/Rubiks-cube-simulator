@@ -38,8 +38,6 @@ class Cube:
         for _ in range(num_of_moves):
             side_names.append(choice(ALL_SIDE_NAMES))
             rotations.append(choice([-1, 1, 2]))
-        print(side_names)
-        print(rotations)
         for side_name, rotation in zip(side_names, rotations):
             self.rotate_side(side_name, rotation)
 
