@@ -1,6 +1,7 @@
 import pygame, sys
 from pygame.locals import QUIT, KEYDOWN, K_ESCAPE, MOUSEBUTTONDOWN
 
+import pygame_textinput
 import cube
 
 
@@ -27,9 +28,7 @@ def draw_cube(cube_to_draw, start_x, start_y, size_x, size_y):
     draw_side(cube_to_draw.sides['D'], start_x + x, start_y + 2 * y)
 
 
-
-
-FPS = 5
+FPS = 10
 BACKGROUND_COLOR = (64, 64, 64)
 WIDTH, HEIGHT = 500, 500
 main_clock = pygame.time.Clock()
@@ -57,7 +56,6 @@ def draw_text(text, font, color, surface, coordinates):
     textrect.topleft = coordinates
     surface.blit(textobj, textrect)
 
-
 def create_buttons(names, start_x, start_y):
     max_j, max_i = len(names), len(names[0])
     j, i = BUTTONS_SHAPE
@@ -67,50 +65,61 @@ def create_buttons(names, start_x, start_y):
                                         BUTTON_WIDTH - 2, BUTTON_HEIGHT - 2)
             TEXTS[names[j][i]] = (start_x + i * BUTTON_WIDTH, start_y + j * BUTTON_HEIGHT)
 
-
 create_buttons(BUTTON_NAMES,
                WIDTH - BUTTONS_SHAPE[1] * BUTTON_WIDTH // 0.9,
                HEIGHT - BUTTONS_SHAPE[0] * BUTTON_HEIGHT // 0.9)
 
+text_input = pygame_textinput.TextInput()
+
 c = cube.Cube()
-moves_to_do = "R2 U R U R' U' R' U' R' U R'"
+moves_to_do = zip(*c.from_notation("R2 U R U R' U' R' U' R' U R'"))
 
 def main_menu():
     while True:
-        for side_name, rotation in zip(*c.from_notation(moves_to_do)):
+        click = False
 
-            click = False
+        events = pygame.event.get()
 
-            for event in pygame.event.get():
-                if event.type == QUIT:
+        for event in events:
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
                     pygame.quit()
                     sys.exit()
-                if event.type == KEYDOWN:
-                    if event.key == K_ESCAPE:
-                        pygame.quit()
-                        sys.exit()
-                if event.type == MOUSEBUTTONDOWN:
-                    if event.button == 1:
-                        click = True
+            if event.type == MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    click = True
 
-            screen.fill(BACKGROUND_COLOR)
+        screen.fill(BACKGROUND_COLOR)
 
+        # if there are moves to do, do them and draw the cube
+        try:
+            side_name, rotation = next(moves_to_do)
             c.rotate_side(side_name, rotation)
-            draw_cube(c, 50, 50, 360, 270)
+        except:
+            pass
+        draw_cube(c, 50, 50, 360, 270)
 
-            mx, my = pygame.mouse.get_pos()
+        mx, my = pygame.mouse.get_pos()
+        if click:
+            if BUTTONS['new'].collidepoint((mx, my)):
+                c.generate_solved_cube()
+            elif BUTTONS['scramble'].collidepoint((mx, my)):
+                c.scramble()
 
-            if click:
-                if BUTTONS['new'].collidepoint((mx, my)):
-                    c.generate_solved_cube()
+        # Feed it with events every frame
+        text_input.update(events)
+        # Blit its surface onto the screen
+        screen.blit(text_input.get_surface(), (100, 100))
 
-            for text, button in zip(TEXTS.keys(), BUTTONS.values()):
-                pygame.draw.rect(screen, BUTTON_COLOR, button)
-                draw_text(text, FONT, TEXT_COLOR, screen, TEXTS[text])
+        for text, button in zip(TEXTS.keys(), BUTTONS.values()):
+            pygame.draw.rect(screen, BUTTON_COLOR, button)
+            draw_text(text, FONT, TEXT_COLOR, screen, TEXTS[text])
 
-            pygame.display.update()
-            main_clock.tick(FPS)
+        pygame.display.update()
+        main_clock.tick(FPS)
 
 
-# def do_moves()
 main_menu()
