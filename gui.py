@@ -1,7 +1,6 @@
 import pygame, sys
 from pygame.locals import QUIT, KEYDOWN, K_ESCAPE, MOUSEBUTTONDOWN
 
-# import pygame_textinput
 import cube
 
 
@@ -90,13 +89,6 @@ create_buttons(BUTTON_NAMES,
                HEIGHT - BUTTONS_SHAPE[0] * BUTTON_HEIGHT // 0.9)
 
 
-# TEXT_INPUT_WIDTH, TEXT_INPUT_HEIGHT = WIDTH // 2, HEIGHT // 6
-# TEXT_INPUT_START_X, TEXT_INPUT_START_Y = 5, HEIGHT - TEXT_INPUT_HEIGHT - 5
-# text_input = pygame_textinput.TextInput()
-# text_input_box = pygame.Rect(TEXT_INPUT_START_X, TEXT_INPUT_START_Y,
-#                              TEXT_INPUT_WIDTH, TEXT_INPUT_HEIGHT)
-
-
 def main_menu():
     while True:
         click = False
@@ -133,14 +125,6 @@ def main_menu():
                 c.generate_solved_cube()
             elif BUTTONS['scramble'].collidepoint((mx, my)):
                 c.scramble()
-
-        # # text input box
-        # pygame.draw.rect(screen, (255, 255, 255), text_input_box)
-        # # Feed it with events every frame
-        # text_input.update(events)
-        # # Blit its surface onto the screen
-        # screen.blit(text_input.get_surface(),
-        #             (TEXT_INPUT_START_X + 5, TEXT_INPUT_START_Y + 5))
 
         for text, button in zip(TEXTS.keys(), BUTTONS.values()):
             pygame.draw.rect(screen, BUTTON_COLOR, button)
