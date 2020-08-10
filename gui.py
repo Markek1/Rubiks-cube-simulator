@@ -4,18 +4,25 @@ from pygame.locals import QUIT, KEYDOWN, K_ESCAPE, MOUSEBUTTONDOWN
 import cube
 
 
-def assign_cube_coors(cube_to_assign, start_x, start_y, size_x, size_y):
-    '''Preferably the ratio between size_x ans size_y is 4:3
-       and size_x is divisible by 12 and size_y by 9'''
+def assign_cube_coordinates(cube_to_assign, start_x, start_y, size_x, size_y):
+    '''Assigns coordinates to each side.
 
-    def assign_side_coors(side_name, start_side_x, start_side_y):
+       Preferably the ratio between size_x ans size_y is 4:3
+       and size_x is divisible by 12 and size_y by 9.'''
+
+    def assign_square_coordinates(side_name, start_side_x, start_side_y):
+        '''Assigns coordinates to each square.'''
+
         side = c.sides[side_name]
         s_x, s_y = m_x // 3, m_y // 3 # width and height of each square
+        SQUARE_SPACE_X = CUBE_WIDTH // 200
+        SQUARE_SPACE_Y = CUBE_HEIGHT // 65
+
         for j in range(3):
             for i in range(3):
                 side.squares[j][i].rect =  pygame.Rect(start_side_x + i * (m_x // 3),
                                                          start_side_y + j * (m_x // 3),
-                                                         s_x - 1, s_y - 1) # -1 for small edghes between squares
+                                                         s_x - SQUARE_SPACE_X, s_y - SQUARE_SPACE_Y) # -1 for small edghes between squares
 
     x, y = size_x // 4, size_y // 3 # x, y of each side
     m_x, m_y = x - 3, y - 3 # modified side sizes to have spaces between sides
@@ -27,24 +34,40 @@ def assign_cube_coors(cube_to_assign, start_x, start_y, size_x, size_y):
     c.sides['B'].rect = pygame.Rect(start_x + 3 * x, start_y + y, m_x, m_y)
     c.sides['D'].rect = pygame.Rect(start_x + x, start_y + 2 * y, m_x, m_y)
 
-    assign_side_coors('U', start_x + x, start_y)
-    assign_side_coors('L', start_x, start_y + y)
-    assign_side_coors('F', start_x + x, start_y + y)
-    assign_side_coors('R', start_x + 2 * x, start_y + y)
-    assign_side_coors('B', start_x + 3 * x, start_y + y)
-    assign_side_coors('D', start_x + x, start_y + 2 * y)
+    assign_square_coordinates('U', start_x + x, start_y)
+    assign_square_coordinates('L', start_x, start_y + y)
+    assign_square_coordinates('F', start_x + x, start_y + y)
+    assign_square_coordinates('R', start_x + 2 * x, start_y + y)
+    assign_square_coordinates('B', start_x + 3 * x, start_y + y)
+    assign_square_coordinates('D', start_x + x, start_y + 2 * y)
 
+def draw_cube():
+    '''Draws every square acording to assigned coordinates'''
 
-def draw_squares():
     for side in c.sides.values():
         for j in range(3):
             for i in range(3):
                 pygame.draw.rect(screen, cube.COLORS[side.squares[j][i].color], side.squares[j][i].rect)
 
 
-c = cube.Cube()
-assign_cube_coors(c, 50, 5, 360, 270)
-moves_to_do = zip(*c.from_notation("R2 U R U R' U' R' U' R' U R'2"))
+def draw_text(text, font, color, surface, coordinates):
+    textobj = font.render(text, 1, color)
+    textrect = textobj.get_rect()
+    textrect.topleft = coordinates
+    surface.blit(textobj, textrect)
+
+TEXTS = {}
+def assign_button_coordinates(names, start_x, start_y):
+    '''Assigns each button its coordinates.
+       The placement depends on the shape of BUTTON_NAMES'''
+
+    max_j, max_i = len(names), len(names[0])
+    j, i = BUTTONS_SHAPE
+    for j in range(max_j):
+        for i in range(max_i):
+            BUTTONS[names[j][i]] = pygame.Rect(start_x + i * BUTTON_WIDTH, start_y + j * BUTTON_HEIGHT,
+                                        BUTTON_WIDTH - 2, BUTTON_HEIGHT - 2)
+            TEXTS[names[j][i]] = (start_x + i * BUTTON_WIDTH, start_y + j * BUTTON_HEIGHT)
 
 
 FPS = 10
@@ -62,31 +85,18 @@ BUTTON_NAMES = [['new', 'clear'],
                 ['do', 'scramble'],
                 ['solve', 'options']]
 BUTTONS_SHAPE = (len(BUTTON_NAMES), len(BUTTON_NAMES[0]))
-
-
-FONT = pygame.font.SysFont('bahnschrift', 12)
-TEXTS = {}
-TEXT_COLOR = (0, 0, 0)
-
-
-def draw_text(text, font, color, surface, coordinates):
-    textobj = font.render(text, 1, color)
-    textrect = textobj.get_rect()
-    textrect.topleft = coordinates
-    surface.blit(textobj, textrect)
-
-def create_buttons(names, start_x, start_y):
-    max_j, max_i = len(names), len(names[0])
-    j, i = BUTTONS_SHAPE
-    for j in range(max_j):
-        for i in range(max_i):
-            BUTTONS[names[j][i]] = pygame.Rect(start_x + i * BUTTON_WIDTH, start_y + j * BUTTON_HEIGHT,
-                                        BUTTON_WIDTH - 2, BUTTON_HEIGHT - 2)
-            TEXTS[names[j][i]] = (start_x + i * BUTTON_WIDTH, start_y + j * BUTTON_HEIGHT)
-
-create_buttons(BUTTON_NAMES,
+assign_button_coordinates(BUTTON_NAMES,
                WIDTH - BUTTONS_SHAPE[1] * BUTTON_WIDTH // 0.9,
                HEIGHT - BUTTONS_SHAPE[0] * BUTTON_HEIGHT // 0.9)
+
+FONT = pygame.font.SysFont('bahnschrift', 12)
+TEXT_COLOR = (0, 0, 0)
+
+c = cube.Cube()
+CUBE_WIDTH, CUBE_HEIGHT = WIDTH // 1.2, HEIGHT // 1.5
+CUBE_X, CUBE_Y = WIDTH // 15, HEIGHT // 30
+assign_cube_coordinates(c, CUBE_X, CUBE_Y, CUBE_WIDTH, CUBE_HEIGHT)
+moves_to_do = zip(*c.from_notation("R2 U R U R' U' R' U' R' U R'2"))
 
 
 def main_menu():
@@ -109,22 +119,33 @@ def main_menu():
 
         screen.fill(BACKGROUND_COLOR)
 
-        # if there are moves to do, do them and draw the cube
+        # if there are moves to do, do them
         try:
             side_name, rotation = next(moves_to_do)
             c.rotate_side(side_name, rotation)
         except:
             pass
 
-        draw_squares()
+        draw_cube()
 
         mx, my = pygame.mouse.get_pos()
         if click:
+
+            # used for painting the cube
+            for side in c.sides.values():
+                if side.rect.collidepoint((mx, my)):
+                    for j in range(3):
+                        for i in range(3):
+                            if side.squares[j][i].rect.collidepoint((mx, my)):
+                                print(side.squares[j][i].color)
+                    break
+
             if BUTTONS['new'].collidepoint((mx, my)):
                 c.generate_solved_cube()
             elif BUTTONS['scramble'].collidepoint((mx, my)):
                 c.scramble()
 
+        # button drawing
         for text, button in zip(TEXTS.keys(), BUTTONS.values()):
             pygame.draw.rect(screen, BUTTON_COLOR, button)
             draw_text(text, FONT, TEXT_COLOR, screen, TEXTS[text])
