@@ -1,7 +1,7 @@
 from collections import deque
 from random import choice
 
-from numpy import full, rot90
+from numpy import empty, rot90
 
 COLORS = {
     'y': (255, 255, 0),
@@ -41,7 +41,11 @@ class Cube:
 
         self.sides = {}
         for side_name, color  in zip(ALL_SIDE_NAMES, COLORS):
-            self.sides[side_name] = Side(full((3, 3), Square(color)))
+            tmp_side = empty((3, 3), dtype=object)
+            for i in range(3):
+                for j in range(3):
+                    tmp_side[j, i] = Square(color)
+            self.sides[side_name] = Side(tmp_side)
 
     def scramble(self, num_of_moves=30):
         '''Calls rotate_side with random moves'''
@@ -160,6 +164,6 @@ if __name__ == '__main__':
     for s_n, r in zip(*c.from_notation(test_rot)):
         c.rotate_side(s_n, r)
 
-    c.scramble(10)
+    # c.scramble(10)
 
     c.print_cube()
