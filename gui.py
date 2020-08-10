@@ -1,31 +1,51 @@
 import pygame, sys
 from pygame.locals import QUIT, KEYDOWN, K_ESCAPE, MOUSEBUTTONDOWN
 
-import pygame_textinput
+# import pygame_textinput
 import cube
 
 
-def draw_cube(cube_to_draw, start_x, start_y, size_x, size_y):
+def assign_cube_coors(cube_to_assign, start_x, start_y, size_x, size_y):
     '''Preferably the ratio between size_x ans size_y is 4:3
        and size_x is divisible by 12 and size_y by 9'''
 
-    def draw_side(side, start_side_x, start_side_y):
+    def assign_side_coors(side_name, start_side_x, start_side_y):
+        side = c.sides[side_name]
         s_x, s_y = m_x // 3, m_y // 3 # width and height of each square
         for j in range(3):
             for i in range(3):
-                pygame.draw.rect(screen, cube.COLORS[side[j][i]],
-                                pygame.Rect(start_side_x + i * (m_x // 3),
-                                            start_side_y + j * (m_x // 3),
-                                            s_x - 1, s_y - 1)) # -1 for small edghes between squares
+                side.squares[j][i].rect =  pygame.Rect(start_side_x + i * (m_x // 3),
+                                                         start_side_y + j * (m_x // 3),
+                                                         s_x - 1, s_y - 1) # -1 for small edghes between squares
 
     x, y = size_x // 4, size_y // 3 # x, y of each side
     m_x, m_y = x - 3, y - 3 # modified side sizes to have spaces between sides
-    draw_side(cube_to_draw.sides['U'], start_x + x, start_y)
-    draw_side(cube_to_draw.sides['L'], start_x, start_y + y)
-    draw_side(cube_to_draw.sides['F'], start_x + x, start_y + y)
-    draw_side(cube_to_draw.sides['R'], start_x + 2 * x, start_y + y)
-    draw_side(cube_to_draw.sides['B'], start_x + 3 * x, start_y + y)
-    draw_side(cube_to_draw.sides['D'], start_x + x, start_y + 2 * y)
+
+    c.sides['U'].rect = pygame.Rect(start_x + x, start_y, m_x, m_y)
+    c.sides['L'].rect = pygame.Rect(start_x, start_y + y, m_x, m_y)
+    c.sides['F'].rect = pygame.Rect(start_x + x, start_y + y, m_x, m_y)
+    c.sides['R'].rect = pygame.Rect(start_x + 2 * x, start_y + y, m_x, m_y)
+    c.sides['B'].rect = pygame.Rect(start_x + 3 * x, start_y + y, m_x, m_y)
+    c.sides['D'].rect = pygame.Rect(start_x + x, start_y + 2 * y, m_x, m_y)
+
+    assign_side_coors('U', start_x + x, start_y)
+    assign_side_coors('L', start_x, start_y + y)
+    assign_side_coors('F', start_x + x, start_y + y)
+    assign_side_coors('R', start_x + 2 * x, start_y + y)
+    assign_side_coors('B', start_x + 3 * x, start_y + y)
+    assign_side_coors('D', start_x + x, start_y + 2 * y)
+
+
+def draw_squares():
+    for side in c.sides.values():
+        for j in range(3):
+            for i in range(3):
+                pygame.draw.rect(screen, cube.COLORS[side.squares[j][i].color], side.squares[j][i].rect)
+
+
+c = cube.Cube()
+assign_cube_coors(c, 50, 5, 360, 270)
+moves_to_do = zip(*c.from_notation("R2 U R U R' U' R' U' R' U R'2"))
 
 
 FPS = 10
@@ -69,10 +89,13 @@ create_buttons(BUTTON_NAMES,
                WIDTH - BUTTONS_SHAPE[1] * BUTTON_WIDTH // 0.9,
                HEIGHT - BUTTONS_SHAPE[0] * BUTTON_HEIGHT // 0.9)
 
-text_input = pygame_textinput.TextInput()
 
-c = cube.Cube()
-moves_to_do = zip(*c.from_notation("R2 U R U R' U' R' U' R' U R'"))
+# TEXT_INPUT_WIDTH, TEXT_INPUT_HEIGHT = WIDTH // 2, HEIGHT // 6
+# TEXT_INPUT_START_X, TEXT_INPUT_START_Y = 5, HEIGHT - TEXT_INPUT_HEIGHT - 5
+# text_input = pygame_textinput.TextInput()
+# text_input_box = pygame.Rect(TEXT_INPUT_START_X, TEXT_INPUT_START_Y,
+#                              TEXT_INPUT_WIDTH, TEXT_INPUT_HEIGHT)
+
 
 def main_menu():
     while True:
@@ -98,9 +121,11 @@ def main_menu():
         try:
             side_name, rotation = next(moves_to_do)
             c.rotate_side(side_name, rotation)
+            c.print_cube()
         except:
             pass
-        draw_cube(c, 50, 50, 360, 270)
+
+        draw_squares()
 
         mx, my = pygame.mouse.get_pos()
         if click:
@@ -109,10 +134,13 @@ def main_menu():
             elif BUTTONS['scramble'].collidepoint((mx, my)):
                 c.scramble()
 
-        # Feed it with events every frame
-        text_input.update(events)
-        # Blit its surface onto the screen
-        screen.blit(text_input.get_surface(), (100, 100))
+        # # text input box
+        # pygame.draw.rect(screen, (255, 255, 255), text_input_box)
+        # # Feed it with events every frame
+        # text_input.update(events)
+        # # Blit its surface onto the screen
+        # screen.blit(text_input.get_surface(),
+        #             (TEXT_INPUT_START_X + 5, TEXT_INPUT_START_Y + 5))
 
         for text, button in zip(TEXTS.keys(), BUTTONS.values()):
             pygame.draw.rect(screen, BUTTON_COLOR, button)

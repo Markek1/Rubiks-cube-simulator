@@ -30,15 +30,21 @@ class Side:
     def __init__(self, squares):
         self.squares = squares
 
+    def _rotate90(self, k):
+        tmp_colors = empty((3, 3), dtype=str)
+        for j in range(3):
+            for i in range(3):
+                tmp_colors[j, i] = self.squares[j, i].color
+        tmp_colors = rot90(tmp_colors, -k)
+
+        for j in range(3):
+            for i in range(3):
+                self.squares[j, i].color = tmp_colors[j, i]
+
 
 class Cube:
 
     def __init__(self):
-        self.generate_solved_cube()
-
-    def generate_solved_cube(self):
-        '''Fills each side with 1 color'''
-
         self.sides = {}
         for side_name, color  in zip(ALL_SIDE_NAMES, COLORS):
             tmp_side = empty((3, 3), dtype=object)
@@ -46,6 +52,15 @@ class Cube:
                 for j in range(3):
                     tmp_side[j, i] = Square(color)
             self.sides[side_name] = Side(tmp_side)
+
+        self.generate_solved_cube()
+
+    def generate_solved_cube(self):
+        '''Fills each side with 1 color'''
+        for side_name, color  in zip(ALL_SIDE_NAMES, COLORS):
+            for i in range(3):
+                for j in range(3):
+                    self.sides[side_name].squares[j][i].color = color
 
     def scramble(self, num_of_moves=30):
         '''Calls rotate_side with random moves'''
@@ -64,7 +79,7 @@ class Cube:
            then finds the effect of rotation on other sides
            and shifts parts of them'''
 
-        self.sides[side_name].squares = rot90(self.sides[side_name].squares, k=-rotation)
+        self.sides[side_name]._rotate90(rotation)
 
         if side_name == 'U':
             sides_and_slices = [['B', 0],
@@ -105,12 +120,13 @@ class Cube:
 
         cur_slices = []
         for sid, sli in sides_and_slices:
-            cur_slices.append(self.sides[sid].squares[sli].copy())
+            cur_slices.append([square.color for square in self.sides[sid].squares[sli]].copy())
         cur_slices = deque(cur_slices)
         cur_slices.rotate(rotation)
 
-        for i, (sid, sli) in enumerate(sides_and_slices):
-            self.sides[sid].squares[sli] = cur_slices[i]
+        for j, (sid, sli) in enumerate(sides_and_slices):
+            for i, square in enumerate(self.sides[sid].squares[sli]):
+                square.color = cur_slices[j][i]
 
 
     def print_cube(self):
