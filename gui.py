@@ -36,7 +36,7 @@ pygame.init()
 pygame.display.set_caption('Rubiks cube simulator')
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
-BUTTON_COLOR = (0, 240, 255)
+BUTTON_COLOR = (100,238,255)
 BUTTON_WIDTH, BUTTON_HEIGHT = WIDTH // 8, HEIGHT // 15
 BUTTONS = {}
 BUTTON_NAMES = [['new', 'clear'],
@@ -45,7 +45,7 @@ BUTTON_NAMES = [['new', 'clear'],
 BUTTONS_SHAPE = (len(BUTTON_NAMES), len(BUTTON_NAMES[0]))
 
 
-FONT = pygame.font.SysFont('arialrounded', 12)
+FONT = pygame.font.SysFont('bahnschrift', 12)
 TEXTS = {}
 TEXT_COLOR = (0, 0, 0)
 
