@@ -18,6 +18,19 @@ NOTATION = {
     1:"",
     -1:"'"}
 
+
+class Square:
+    def __init__(self, color):
+        self.color = color
+    def __repr__(self):
+        return self.color
+
+
+class Side:
+    def __init__(self, squares):
+        self.squares = squares
+
+
 class Cube:
 
     def __init__(self):
@@ -28,7 +41,7 @@ class Cube:
 
         self.sides = {}
         for side_name, color  in zip(ALL_SIDE_NAMES, COLORS):
-            self.sides[side_name] = full((3, 3), color)
+            self.sides[side_name] = Side(full((3, 3), Square(color)))
 
     def scramble(self, num_of_moves=30):
         '''Calls rotate_side with random moves'''
@@ -47,7 +60,7 @@ class Cube:
            then finds the effect of rotation on other sides
            and shifts parts of them'''
 
-        self.sides[side_name] = rot90(self.sides[side_name], k=-rotation)
+        self.sides[side_name].squares = rot90(self.sides[side_name].squares, k=-rotation)
 
         if side_name == 'U':
             sides_and_slices = [['B', 0],
@@ -88,25 +101,25 @@ class Cube:
 
         cur_slices = []
         for sid, sli in sides_and_slices:
-            cur_slices.append(self.sides[sid][sli].copy())
+            cur_slices.append(self.sides[sid].squares[sli].copy())
         cur_slices = deque(cur_slices)
         cur_slices.rotate(rotation)
 
         for i, (sid, sli) in enumerate(sides_and_slices):
-            self.sides[sid][sli] = cur_slices[i]
+            self.sides[sid].squares[sli] = cur_slices[i]
 
 
     def print_cube(self):
         for i in range(3):
-            print(f"\t\t{self.sides['U'][i]}")
+            print(f"\t{self.sides['U'].squares[i]}")
         print()
         for i in range(3):
             for side in 'LFRB':
-                print(self.sides[side][i], end='\t')
+                print(self.sides[side].squares[i], end='\t')
             print()
         print()
         for i in range(3):
-            print(f"\t\t{self.sides['D'][i]}")
+            print(f"\t{self.sides['D'].squares[i]}")
         print('-' * 60)
 
 
@@ -142,11 +155,11 @@ if __name__ == '__main__':
 
     c.print_cube()
 
-    # test_rot = "R2 U R U R' U' R' U' R' U R'"
-    # for s_n, r in zip(*c.from_notation(test_rot)):
-    #     c.rotate_side(s_n, r)
+    c.generate_solved_cube()
+    test_rot = "R2 U R U R' U' R' U' R' U R'"
+    for s_n, r in zip(*c.from_notation(test_rot)):
+        c.rotate_side(s_n, r)
 
     c.scramble(10)
 
     c.print_cube()
-    # print(c.to_notation(s_n, r))
