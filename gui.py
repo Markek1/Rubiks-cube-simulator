@@ -113,7 +113,6 @@ def main_menu():
         try:
             side_name, rotation = next(moves_to_do)
             c.rotate_side(side_name, rotation)
-            c.print_cube()
         except:
             pass
 
