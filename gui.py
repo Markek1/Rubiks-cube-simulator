@@ -50,12 +50,6 @@ def draw_cube():
                 pygame.draw.rect(screen, cube.COLORS[side.squares[j][i].color], side.squares[j][i].rect)
 
 
-def draw_text(text, font, color, surface, coordinates):
-    textobj = font.render(text, 1, color)
-    textrect = textobj.get_rect()
-    textrect.topleft = coordinates
-    surface.blit(textobj, textrect)
-
 TEXTS = {}
 def assign_button_coordinates(names, start_x, start_y):
     '''Assigns each button its coordinates.
@@ -69,6 +63,29 @@ def assign_button_coordinates(names, start_x, start_y):
                                         BUTTON_WIDTH - 2, BUTTON_HEIGHT - 2)
             TEXTS[names[j][i]] = (start_x + i * BUTTON_WIDTH, start_y + j * BUTTON_HEIGHT)
 
+def draw_text(text, font, color, surface, coordinates):
+    textobj = font.render(text, 1, color)
+    textrect = textobj.get_rect()
+    textrect.topleft = coordinates
+    surface.blit(textobj, textrect)
+
+def draw_buttons():
+    for text, button in zip(TEXTS.keys(), BUTTONS.values()):
+        pygame.draw.rect(screen, BUTTON_COLOR, button)
+        draw_text(text, FONT, TEXT_COLOR, screen, TEXTS[text])
+
+
+COLOR_CHOICES = []
+def assign_color_choice_coordinates(start_x, start_y):
+    for i in range(6):
+        COLOR_CHOICES.append(pygame.Rect(start_x + i * COLOR_CHOICE_WIDTH, start_y,
+                                COLOR_CHOICE_WIDTH - 2, COLOR_CHOICE_HEIGHT - 2))
+
+def draw_color_choices():
+    for i, color in enumerate(cube.COLORS.values()):
+        pygame.draw.rect(screen, color, COLOR_CHOICES[i])
+
+
 
 FPS = 10
 BACKGROUND_COLOR = (64, 64, 64)
@@ -81,8 +98,8 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 BUTTON_COLOR = (100,238,255)
 BUTTON_WIDTH, BUTTON_HEIGHT = WIDTH // 8, HEIGHT // 15
 BUTTONS = {}
-BUTTON_NAMES = [['new', 'clear'],
-                ['do', 'scramble'],
+BUTTON_NAMES = [['new', 'scramble'],
+                ['do', 'o'],
                 ['solve', 'options']]
 BUTTONS_SHAPE = (len(BUTTON_NAMES), len(BUTTON_NAMES[0]))
 assign_button_coordinates(BUTTON_NAMES,
@@ -91,6 +108,12 @@ assign_button_coordinates(BUTTON_NAMES,
 
 FONT = pygame.font.SysFont('bahnschrift', 12)
 TEXT_COLOR = (0, 0, 0)
+
+COLOR_CHOICE_WIDTH = WIDTH // 18
+COLOR_CHOICE_HEIGHT = COLOR_CHOICE_WIDTH
+COLOR_CHOICE_X = WIDTH - 6 * COLOR_CHOICE_WIDTH
+COLOR_CHOICE_Y = 1
+assign_color_choice_coordinates(COLOR_CHOICE_X, COLOR_CHOICE_Y)
 
 c = cube.Cube()
 CUBE_WIDTH, CUBE_HEIGHT = WIDTH // 1.2, HEIGHT // 1.5
@@ -104,7 +127,6 @@ def main_menu():
         click = False
 
         events = pygame.event.get()
-
         for event in events:
             if event.type == QUIT:
                 pygame.quit()
@@ -117,16 +139,17 @@ def main_menu():
                 if event.button == 1:
                     click = True
 
-        screen.fill(BACKGROUND_COLOR)
-
         # if there are moves to do, do them
         try:
             side_name, rotation = next(moves_to_do)
             c.rotate_side(side_name, rotation)
-        except:
+        except StopIteration:
             pass
 
+        screen.fill(BACKGROUND_COLOR)
         draw_cube()
+        draw_color_choices()
+        draw_buttons()
 
         mx, my = pygame.mouse.get_pos()
         if click:
@@ -137,18 +160,18 @@ def main_menu():
                     for j in range(3):
                         for i in range(3):
                             if side.squares[j][i].rect.collidepoint((mx, my)):
-                                print(side.squares[j][i].color)
+                                side.squares[j][i].color = chosen_color
                     break
+
+            # chosing painting color
+            for i, color in enumerate(cube.COLORS):
+                if COLOR_CHOICES[i].collidepoint((mx, my)):
+                    chosen_color = color
 
             if BUTTONS['new'].collidepoint((mx, my)):
                 c.generate_solved_cube()
             elif BUTTONS['scramble'].collidepoint((mx, my)):
                 c.scramble()
-
-        # button drawing
-        for text, button in zip(TEXTS.keys(), BUTTONS.values()):
-            pygame.draw.rect(screen, BUTTON_COLOR, button)
-            draw_text(text, FONT, TEXT_COLOR, screen, TEXTS[text])
 
         pygame.display.update()
         main_clock.tick(FPS)
